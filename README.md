@@ -1,7 +1,7 @@
 # wix-package
 compose desktop 默认的打包插件有一些问题：
 - 不能生成卸载快捷方式，
-- 不能设置单独快捷方式的名称，有一些 windows 用户的安装目录不能有中文字符，但是快捷方式的名称又必须是中文的。
+- 不能设置单独快捷方式的名称，有一些 windows 用户的安装目录不能有中文字符，但是又需要把快捷方式设置成中文的。
 - 比如卸载软件的时候可能会误删文件，如果操作失误把软件安装到了 `D:\Program Files` 而不是 `C:\Program Files\productName` 卸载的时候会把 `D:\Program Files` 下的所有文件都删除掉。
 
 compose desktop 的打包插件底层依赖 jpackage, jpackage 在 windows 系统底层依赖 wix，wix 是一个功能强大的打包工具，可以解决上述问题。
