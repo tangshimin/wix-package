@@ -17,15 +17,16 @@ compose desktop 插件在执行 `createDistributable` 任务时会自动下载 w
 
 现在还只是一个脚本，后续可能会封装成一个插件。
 ## 使用方法
-1. 把 `wix.gradle.kts` 复制到项目根目录
-2. 在 `build.gradle.kts` 添加
+1. 先把`build.gradle.kts`里的 packageName 设置成英文，不设置也可以（因为还要打包 macOS 版），但是需要再写一个 Task 在 `createDistributable` 创建 app-image 之后把文件夹重命名为英语。
+2. 把 `wix.gradle.kts` 复制到项目根目录
+3. 在 `build.gradle.kts` 添加
     ```kotlin
       apply(from = "wix.gradle.kts")
     ```
-3. 设置 `wix.gradle.kts` 中的 manufacturer、shortcutName、licenseFile 和 iconFile 等参数
+4. 设置 `wix.gradle.kts` 中的 manufacturer、shortcutName、licenseFile 和 iconFile 等参数
 
-4. 执行 `lightWixobj` 任务，就可以生成 msi 安装包了。
-5. 这段脚本有 4 个任务，分别是 `harvest`、`editWxs`、`compileWxs`、`lightWixobj`，可以单独执行，方便调试。
+5. 执行 `lightWixobj` 任务，就可以生成 msi 安装包了。
+6. 这段脚本有 4 个任务，分别是 `harvest`、`editWxs`、`compileWxs`、`lightWixobj`，可以单独执行，方便调试。
 
 ## Task 说明
 - `harvest` 依赖 `createDistributable` Task 创建的 app-image 文件夹,然后使用 Wix 的 heat 命令收集 app-image 文件夹里的文件，生成一个 wxs 文件
