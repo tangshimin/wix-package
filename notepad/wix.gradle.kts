@@ -10,17 +10,19 @@ import javax.xml.transform.stream.StreamResult
 import javax.xml.transform.OutputKeys
 import java.nio.charset.StandardCharsets
 
-
+// 如果要让用户选择安装路径，需要设置 license 文件，如果不设置，会使用一个默认的 license
+// 如果不想在安装界面显示 license，需要把 249 到 257 行注释掉
 val licenseFile = project.file("license.rtf")
 val licensePath = if(licenseFile.exists()) licenseFile.absolutePath else ""
 
+// 设置安装包的图标，显示在控制面板的应用程序列表
 val iconFile = project.file("src/main/resources/logo/logo.ico")
 val iconPath = if(iconFile.exists()) iconFile.absolutePath else ""
 
 
 // 可以设置为开发者的名字或开发商的名字，在控制面板里 manufacturer 会显示为发布者
 // 这个信息会和项目的名称一起写入到注册表中
-val manufacturer = "未知"
+val manufacturer = "深圳市龙华区幕境网络工作室"
 
 // 快捷方式的名字，会显示在桌面和开始菜单
 val shortcutName = "记事本"
@@ -33,7 +35,13 @@ project.tasks.register<Exec>("harvest") {
     val createDistributable = tasks.named("createDistributable")
     dependsOn(createDistributable)
     workingDir(appDir)
-    val heat = project.layout.projectDirectory.file("build/wix311/heat.exe").getAsFile().absolutePath
+
+    var heatFile = project.layout.projectDirectory.file("build/wix311/heat.exe").getAsFile()
+    // 有的版本的 wix311 在 build 目录下，有的版本在项目根目录下
+    if(!heatFile.exists()) {
+        heatFile = project.layout.projectDirectory.file("wix311/heat.exe").getAsFile()
+    }
+    val heat = heatFile.absolutePath
 
     commandLine(
         heat,
@@ -76,7 +84,13 @@ project.tasks.register<Exec>("compileWxs") {
     val editWxs = tasks.named("editWxs")
     dependsOn(editWxs)
     workingDir(appDir)
-    val candle = project.layout.projectDirectory.file("build/wix311/candle.exe").getAsFile().absolutePath
+
+    var candleFile = project.layout.projectDirectory.file("build/wix311/candle.exe").getAsFile()
+    // 有的版本的 wix311 在 build 目录下，有的版本在项目根目录下
+    if(!candleFile.exists()) {
+        candleFile = project.layout.projectDirectory.file("wix311/candle.exe").getAsFile()
+    }
+    val candle = candleFile.absolutePath
     commandLine(candle, "${project.name}.wxs","-nologo", "-dSourceDir=.\\${project.name}")
 }
 
@@ -86,7 +100,12 @@ project.tasks.register<Exec>("lightWixobj") {
     val compileWxs = tasks.named("compileWxs")
     dependsOn(compileWxs)
     workingDir(appDir)
-    val light = project.layout.projectDirectory.file("build/wix311/light.exe").getAsFile().absolutePath
+    var lightFile =  project.layout.projectDirectory.file("build/wix311/light.exe").getAsFile()
+    // 有的版本的 wix311 在 build 目录下，有的版本在项目根目录下
+    if(!lightFile.exists()) {
+        lightFile = project.layout.projectDirectory.file("wix311/light.exe").getAsFile()
+    }
+    val light = lightFile.absolutePath
 
     commandLine(light, "-ext", "WixUIExtension", "-cultures:zh-CN", "-spdb","-nologo", "${project.name}.wixobj", "-o", "${project.name}-${project.version}.msi")
 }
