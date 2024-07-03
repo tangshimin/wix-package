@@ -113,7 +113,7 @@ private fun editWixTask(
     // 这个 Name 属性会出现在安装引导界面
     // 控制面板-程序列表里也是这个名字
     productElement.setAttribute("Name", "${shortcutName}")
-    productElement.setAttribute("Version", "2.3.1")
+    productElement.setAttribute("Version", "${project.version}")
 
     val packageElement = productElement.getElementsByTagName("Package").item(0) as Element
     packageElement.setAttribute("Compressed", "yes")
