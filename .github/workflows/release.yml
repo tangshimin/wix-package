@@ -1,0 +1,53 @@
+name: Build Release Binaries
+
+on:
+  workflow_dispatch:
+
+jobs:
+   # Windows Package
+   create-win-package:
+     runs-on: windows-latest
+     permissions:
+       contents: write
+     name: Create Windows Package
+     steps:
+       # Setup Java environment for the next steps
+       - name: Setup Java
+         uses: actions/setup-java@v2
+         with:
+           distribution: 'zulu'
+           java-version: 21
+
+       # Check out current repository
+       - name: Fetch Sources
+         uses: actions/checkout@v4
+
+       # 设置工作目录
+       - name: Set working directory
+         run: |
+           echo '${{ github.workspace }}'
+          
+       # Build Desktop Packaged application
+       - name: Desktop App Package
+         run: |
+           cd "${{ github.workspace }}"
+           cd notepad
+           ./gradlew lightWixobj
+
+       # Get the latest tag
+       - name: Get latest tag
+         id: latesttag
+         run: |
+           TAG=$(git describe --tags $(git rev-list --tags --max-count=1) 2>/dev/null || echo "1.0.0")
+           echo "TAG=$TAG" >> $GITHUB_ENV
+
+       # Create a Draft Release
+       - name: Draft Release
+         uses: ncipollo/release-action@v1
+         with:
+           draft: true
+           allowUpdates: true
+           generateReleaseNotes: false  #自动生成发行说明。
+           tag: "${{ env.TAG }}"
+           artifacts: "${{ github.workspace }}/build/compose/binaries/main/app/*.msi"
+           token: ${{ secrets.GITHUB_TOKEN  }}
