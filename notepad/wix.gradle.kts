@@ -115,6 +115,14 @@ private fun editWixTask(
     productElement.setAttribute("Name", "${shortcutName}")
     productElement.setAttribute("Version", "${project.version}")
 
+    // 设置升级码, 用于升级,大版本更新时，可能需要修改这个值
+    // 如果要修改这个值，可能还需要修改安装位置，如果不修改安装位置，两个版本会安装在同一个位置
+    // 这段代码和 MajorUpgrade 相关，如果 UpgradeCode 一直保持不变，安装新版的时候会自动卸载旧版本。
+    val upgradeCode = createNameUUID("UpgradeCode")
+    productElement.setAttribute("UpgradeCode", upgradeCode)
+
+
+
     val packageElement = productElement.getElementsByTagName("Package").item(0) as Element
     packageElement.setAttribute("Compressed", "yes")
     packageElement.setAttribute("InstallerVersion", "200")
@@ -279,6 +287,20 @@ private fun editWixTask(
         wixVariable.setAttributeNode(wixVariableValue)
         productElement.appendChild(wixVariable)
     }
+
+
+    // 安装新版时，自动卸载旧版本，已经安装新版，再安装旧版本，提示用户先卸载新版。
+    // 这段逻辑要和 UpgradeCode 一起设置，如果 UpgradeCode 一直保持不变，安装新版的时候会自动卸载旧版本。
+    // 如果 UpgradeCode 改变了，可能会安装两个版本
+    // <MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A newer version of [ProductName] is already installed." AllowSameVersionUpgrades="yes"/>
+    val majorUpgrade = doc.createElement("MajorUpgrade")
+    val majorUpgradeDowngradeErrorMessage = doc.createAttribute("DowngradeErrorMessage")
+    majorUpgradeDowngradeErrorMessage.value = "新版的[ProductName]已经安装，如果要安装旧版本，请先把新版本卸载。"
+    val majorUpgradeAllowSameVersionUpgrades = doc.createAttribute("AllowSameVersionUpgrades")
+    majorUpgradeAllowSameVersionUpgrades.value = "yes"
+    majorUpgrade.setAttributeNode(majorUpgradeAllowSameVersionUpgrades)
+    majorUpgrade.setAttributeNode(majorUpgradeDowngradeErrorMessage)
+    productElement.appendChild(majorUpgrade)
 
 
     // 设置 fragment 节点
