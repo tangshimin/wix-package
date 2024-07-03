@@ -21,6 +21,9 @@ jobs:
        # Check out current repository
        - name: Fetch Sources
          uses: actions/checkout@v4
+         with:
+           fetch-depth: 0  # Fetch all history
+           tags: true  # Fetch all tags
 
        # 设置工作目录
        - name: Set working directory
