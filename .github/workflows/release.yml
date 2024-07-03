@@ -52,5 +52,5 @@ jobs:
            allowUpdates: true
            generateReleaseNotes: false  #自动生成发行说明。
            tag: "${{ env.TAG }}"
-           artifacts: "${{ github.workspace }}/build/compose/binaries/main/app/*.msi"
+           artifacts: "${{ github.workspace }}notepad/build/compose/binaries/main/app/*.msi"
            token: ${{ secrets.GITHUB_TOKEN  }}
