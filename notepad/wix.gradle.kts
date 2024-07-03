@@ -106,10 +106,11 @@ private fun editWixTask(
     val doc = dbf.newDocumentBuilder().parse(wixFile)
     doc.documentElement.normalize()
 
+    // 设置 Product 节点
+    //<Product Codepage="" Id="" Language="" Manufacturer="" Name="" UpgradeCode="" Version="1.0">
     val productElement = doc.documentElement.getElementsByTagName("Product").item(0) as Element
     productElement.setAttribute("Manufacturer", manufacturer)
     productElement.setAttribute("Codepage", "936")
-
     // 这个 Name 属性会出现在安装引导界面
     // 控制面板-程序列表里也是这个名字
     productElement.setAttribute("Name", "${shortcutName}")
@@ -122,7 +123,8 @@ private fun editWixTask(
     productElement.setAttribute("UpgradeCode", upgradeCode)
 
 
-
+    // 设置 Package 节点
+    // <Package Compressed="" InstallerVersion="" Languages="" Manufacturer="" Platform="x64"/>
     val packageElement = productElement.getElementsByTagName("Package").item(0) as Element
     packageElement.setAttribute("Compressed", "yes")
     packageElement.setAttribute("InstallerVersion", "200")
@@ -131,6 +133,7 @@ private fun editWixTask(
     packageElement.setAttribute("Platform", "x64")
 
 
+    //  <Directory Id="TARGETDIR" Name="SourceDir">
     val targetDirectory = doc.documentElement.getElementsByTagName("Directory").item(0) as Element
 
     // 添加桌面快捷方式
