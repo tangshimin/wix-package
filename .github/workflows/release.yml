@@ -38,9 +38,8 @@ jobs:
        - name: Get latest tag
          id: latesttag
          run: |
-           $TAG = git describe --tags $(git rev-list --tags --max-count=1)   
-           echo "TAG=$TAG"
-           echo "TAG=$TAG" >> $GITHUB_ENV
+           $TAG = git describe --tags (git rev-list --tags --max-count=1)           
+           echo "TAG=$TAG" >> $env:GITHUB_ENV
 
        # Create a Draft Release
        - name: Draft Release
