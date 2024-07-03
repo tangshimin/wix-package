@@ -348,7 +348,7 @@ private fun registryBuilder(doc: Document, id: String, productCode: String): Ele
     val regType = doc.createAttribute("Type")
     regType.value = "string"
     val regName = doc.createAttribute("Name")
-    regName.value = "[ProductCode]"
+    regName.value = "ProductCode"
     val regValue = doc.createAttribute("Value")
     regValue.value = productCode
     val regKeyPath = doc.createAttribute("KeyPath")
