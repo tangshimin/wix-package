@@ -1,4 +1,6 @@
 # wix-package
+使用 wix 打包 compose-desktop 生成的 application image 生成 msi 安装包。
+
 compose desktop 默认的打包插件有一些问题：
 - 不能生成卸载快捷方式，
 - 不能设置单独快捷方式的名称，有一些 windows 用户的安装目录不能有中文字符，但是又需要把快捷方式设置成中文的。
