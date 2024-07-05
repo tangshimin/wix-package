@@ -22,7 +22,7 @@ val iconPath = if(iconFile.exists()) iconFile.absolutePath else ""
 
 // 可以设置为开发者的名字或开发商的名字，在控制面板里 manufacturer 会显示为发布者
 // 这个信息会和项目的名称一起写入到注册表中
-val manufacturer = "深圳市龙华区幕境网络工作室"
+val manufacturer = "未知"
 
 // 快捷方式的名字，会显示在桌面和开始菜单
 val shortcutName = "记事本"
