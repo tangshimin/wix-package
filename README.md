@@ -27,7 +27,7 @@ compose desktop 插件在执行 `createDistributable` 任务时会自动下载 w
     ```
 4. 设置 `wix.gradle.kts` 中的 manufacturer、shortcutName、licenseFile 和 iconFile 等参数
 
-5. 执行 `lightWixobj` 任务，就可以生成 msi 安装包了。
+5. 执行 `lightWixobj` 任务，就可以生成 msi 安装包了。这个脚本会创建 3 个快捷方式，分别是桌面快捷方式、开始菜单快捷方式、卸载快捷方式。
 6. 这段脚本有 4 个任务，分别是 `harvest`、`editWxs`、`compileWxs`、`lightWixobj`，可以单独执行，方便调试。
 
 ## Task 说明
