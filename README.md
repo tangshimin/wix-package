@@ -2,7 +2,6 @@
 使用 wix 打包 compose-desktop 生成的 application image 生成 msi 安装包。
 
 compose desktop 默认的打包插件有一些问题：
-- 不能生成卸载快捷方式，
 - 不能设置单独快捷方式的名称，有一些 windows 用户的安装目录不能有中文字符，但是又需要把快捷方式设置成中文的。
 - 比如卸载软件的时候可能会误删文件，如果操作失误把软件安装到了 `D:\Program Files` 而不是 `D:\Program Files\productName` 卸载的时候会把 `D:\Program Files` 下的所有文件都删除掉。
 
