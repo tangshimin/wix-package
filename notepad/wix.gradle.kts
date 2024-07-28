@@ -12,8 +12,7 @@ import java.nio.charset.StandardCharsets
 
 // 如果要让用户选择安装路径，需要设置 license 文件，如果不设置，会使用一个默认的 license
 val licenseFile = project.file("license.rtf")
-//val licensePath = if(licenseFile.exists()) licenseFile.absolutePath else ""
-val licensePath = ""
+val licensePath = if(licenseFile.exists()) licenseFile.absolutePath else ""
 
 // 设置安装包的图标，显示在控制面板的应用程序列表
 val iconFile = project.file("src/main/resources/logo/logo.ico")
@@ -127,29 +126,33 @@ private fun editWixTask(
     // 设置 Product 节点
     //<Product Codepage="" Id="" Language="" Manufacturer="" Name="" UpgradeCode="" Version="1.0">
     val productElement = doc.documentElement.getElementsByTagName("Product").item(0) as Element
-    productElement.setAttribute("Manufacturer", manufacturer)
-    productElement.setAttribute("Codepage", "936")
-    // 这个 Name 属性会出现在安装引导界面
-    // 控制面板-程序列表里也是这个名字
-    productElement.setAttribute("Name", "${shortcutName}")
-    productElement.setAttribute("Version", "${project.version}")
 
     // 设置升级码, 用于升级,大版本更新时，可能需要修改这个值
     // 如果要修改这个值，可能还需要修改安装位置，如果不修改安装位置，两个版本会安装在同一个位置
     // 这段代码和 MajorUpgrade 相关，如果 UpgradeCode 一直保持不变，安装新版的时候会自动卸载旧版本。
     val upgradeCode = createNameUUID("v1")
-    productElement.setAttribute("UpgradeCode", upgradeCode)
+    productElement.apply {
+        setAttribute("Manufacturer", manufacturer)
+        setAttribute("Codepage", "936")
+        // 这个 Name 属性会出现在安装引导界面
+        // 控制面板-程序列表里也是这个名字
+        setAttribute("Name", "${shortcutName}")
+        setAttribute("Version", "${project.version}")
+        setAttribute("UpgradeCode", upgradeCode)
+    }
+
 
 
     // 设置 Package 节点
     // <Package Compressed="" InstallerVersion="" Languages="" Manufacturer="" Platform="x64"/>
     val packageElement = productElement.getElementsByTagName("Package").item(0) as Element
-    packageElement.setAttribute("Compressed", "yes")
-    packageElement.setAttribute("InstallerVersion", "200")
-    packageElement.setAttribute("Languages", "1033")
-    packageElement.setAttribute("Manufacturer", manufacturer)
-    packageElement.setAttribute("Platform", "x64")
-
+    packageElement.apply{
+        setAttribute("Compressed", "yes")
+        setAttribute("InstallerVersion", "200")
+        setAttribute("Languages", "1033")
+        setAttribute("Manufacturer", manufacturer)
+        setAttribute("Platform", "x64")
+    }
 
     //  <Directory Id="TARGETDIR" Name="SourceDir">
     val targetDirectory = doc.documentElement.getElementsByTagName("Directory").item(0) as Element
@@ -173,7 +176,6 @@ private fun editWixTask(
 
     programMenuFolderElement.appendChild(programeMenuDir)
     programeMenuDir.appendChild(programeMenuDirComponent)
-//    programeMenuDirComponent.appendChild(startMenuShortcut)
     programeMenuDirComponent.appendChild(removeFolder)
     programeMenuDirComponent.appendChild(pRegistryValue)
 
@@ -245,124 +247,84 @@ private fun editWixTask(
 
     // 设置 UI
     // 添加 <Property Id="WIXUI_INSTALLDIR" Value="INSTALLDIR" />
-    val installUI = doc.createElement("Property")
-    val propertyId = doc.createAttribute("Id")
-    propertyId.value = "WIXUI_INSTALLDIR"
-    val peopertyValue = doc.createAttribute("Value")
-    peopertyValue.value = "INSTALLDIR"
-    installUI.setAttributeNode(propertyId)
-    installUI.setAttributeNode(peopertyValue)
-    productElement.appendChild(installUI)
+    doc.createElement("Property").apply {
+        setAttributeNode(doc.createAttribute("Id").also { it.value = "WIXUI_INSTALLDIR" })
+        setAttributeNode(doc.createAttribute("Value").also { it.value = "INSTALLDIR" })
+    }.also { productElement.appendChild(it) }
+
 
     //<UI>
     //  <UIRef Id="WixUI_InstallDir" />
     //</UI>
     val uiElement = doc.createElement("UI")
     productElement.appendChild(uiElement)
-    val installDirUIRef = doc.createElement("UIRef")
-    val dirUiId = doc.createAttribute("Id")
-    dirUiId.value = "WixUI_InstallDir"
-    installDirUIRef.setAttributeNode(dirUiId)
-    uiElement.appendChild(installDirUIRef)
+    doc.createElement("UIRef").apply {
+        setAttributeNode(doc.createAttribute("Id").also { it.value = "WixUI_InstallDir" })
+    }.also { uiElement.appendChild(it) }
 
-    if(licensePath.isEmpty()){
+    if (licensePath.isEmpty()) {
+
         //  <Publish Dialog="WelcomeDlg"
         //        Control="Next"
         //        Event="NewDialog"
         //        Value="InstallDirDlg"
         //        Order="2">1</Publish>
-        val publish1 = doc.createElement("Publish")
-        val publish1Dialog = doc.createAttribute("Dialog")
-        publish1Dialog.value = "WelcomeDlg"
-        val publish1Control = doc.createAttribute("Control")
-        publish1Control.value = "Next"
-        val publish1Event = doc.createAttribute("Event")
-        publish1Event.value = "NewDialog"
-        val publish1Value = doc.createAttribute("Value")
-        publish1Value.value = "InstallDirDlg"
-        val publish1Order = doc.createAttribute("Order")
-        publish1Order.value = "2"
-        val publish1Text = doc.createTextNode("1")
-        publish1.setAttributeNode(publish1Dialog)
-        publish1.setAttributeNode(publish1Control)
-        publish1.setAttributeNode(publish1Event)
-        publish1.setAttributeNode(publish1Value)
-        publish1.setAttributeNode(publish1Order)
-        publish1.appendChild(publish1Text)
-        uiElement.appendChild(publish1)
+        doc.createElement("Publish").apply {
+            setAttributeNode(doc.createAttribute("Dialog").also { it.value = "WelcomeDlg" })
+            setAttributeNode(doc.createAttribute("Control").also { it.value = "Next" })
+            setAttributeNode(doc.createAttribute("Event").also { it.value = "NewDialog" })
+            setAttributeNode(doc.createAttribute("Value").also { it.value = "InstallDirDlg" })
+            setAttributeNode(doc.createAttribute("Order").also { it.value = "2" })
+            appendChild(doc.createTextNode("1"))
+        }.also { uiElement.appendChild(it) }
 
         //  <Publish Dialog="InstallDirDlg"
         //        Control="Back"
         //        Event="NewDialog"
         //        Value="WelcomeDlg"
         //        Order="2">1</Publish>
-        val publish2 = doc.createElement("Publish")
-        val publish2Dialog = doc.createAttribute("Dialog")
-        publish2Dialog.value = "InstallDirDlg"
-        val publish2Control = doc.createAttribute("Control")
-        publish2Control.value = "Back"
-        val publish2Event = doc.createAttribute("Event")
-        publish2Event.value = "NewDialog"
-        val publish2Value = doc.createAttribute("Value")
-        publish2Value.value = "WelcomeDlg"
-        val publish2Order = doc.createAttribute("Order")
-        publish2Order.value = "2"
-        val publish2Text = doc.createTextNode("1")
-        publish2.setAttributeNode(publish2Dialog)
-        publish2.setAttributeNode(publish2Control)
-        publish2.setAttributeNode(publish2Event)
-        publish2.setAttributeNode(publish2Value)
-        publish2.setAttributeNode(publish2Order)
-        publish2.appendChild(publish2Text)
-        uiElement.appendChild(publish2)
+        val publish2 = doc.createElement("Publish").apply {
+            setAttributeNode(doc.createAttribute("Dialog").also { it.value = "InstallDirDlg" })
+            setAttributeNode(doc.createAttribute("Control").also { it.value = "Back" })
+            setAttributeNode(doc.createAttribute("Event").also { it.value = "NewDialog" })
+            setAttributeNode(doc.createAttribute("Value").also { it.value = "WelcomeDlg" })
+            setAttributeNode(doc.createAttribute("Order").also { it.value = "2" })
+            appendChild(doc.createTextNode("1"))
+        }.also { uiElement.appendChild(it) }
 
     }
 
 
     // 添加 <UIRef Id="WixUI_ErrorProgressText" />
-    val errText = doc.createElement("UIRef")
-    val errUiId = doc.createAttribute("Id")
-    errUiId.value = "WixUI_ErrorProgressText"
-    errText.setAttributeNode(errUiId)
-    productElement.appendChild(errText)
+    val errText = doc.createElement("UIRef").apply {
+        setAttributeNode(doc.createAttribute("Id").also { it.value = "WixUI_ErrorProgressText" })
+    }.also { productElement.appendChild(it) }
+
 
     //  添加 Icon, 这个 Icon 会显示在控制面板的应用程序列表
     //  <Icon Id="icon.ico" SourceFile="$iconPath"/>
     //  <Property Id="ARPPRODUCTICON" Value="icon.ico" />
     if(iconPath.isNotEmpty()) {
-        val iconElement = doc.createElement("Icon")
-        val iconId = doc.createAttribute("Id")
-        iconId.value = "icon.ico"
-        val iconSourceF = doc.createAttribute("SourceFile")
-        iconSourceF.value = iconPath
-        iconElement.setAttributeNode(iconId)
-        iconElement.setAttributeNode(iconSourceF)
+       doc.createElement("Icon").apply{
+            setAttributeNode(doc.createAttribute("Id").also { it.value = "icon.ico" })
+            setAttributeNode(doc.createAttribute("SourceFile").also { it.value = iconPath })
+        }.also{ productElement.appendChild(it)}
 
-        val iconProperty = doc.createElement("Property")
-        val iconPropertyId = doc.createAttribute("Id")
-        iconPropertyId.value = "ARPPRODUCTICON"
-        val iconPropertyValue = doc.createAttribute("Value")
-        iconPropertyValue.value = "icon.ico"
-        iconProperty.setAttributeNode(iconPropertyId)
-        iconProperty.setAttributeNode(iconPropertyValue)
+       doc.createElement("Property").apply{
+            setAttributeNode(doc.createAttribute("Id").also { it.value = "ARPPRODUCTICON" })
+            setAttributeNode(doc.createAttribute("Value").also { it.value = "icon.ico" })
+        }.also{ productElement.appendChild(it) }
 
-        productElement.appendChild(iconElement)
-        productElement.appendChild(iconProperty)
     }
-
 
 
     // 设置 license file
     //  <WixVariable Id="WixUILicenseRtf" Value="license.rtf" />
     if (licensePath.isNotEmpty()) {
-        val wixVariable = doc.createElement("WixVariable")
-        val wixVariableId = doc.createAttribute("Id")
-        wixVariableId.value = "WixUILicenseRtf"
-        val wixVariableValue = doc.createAttribute("Value")
-        wixVariableValue.value = licensePath
-        wixVariable.setAttributeNode(wixVariableId)
-        wixVariable.setAttributeNode(wixVariableValue)
-        productElement.appendChild(wixVariable)
+        val wixVariable = doc.createElement("WixVariable").apply {
+            setAttributeNode(doc.createAttribute("Id").also { it.value = "WixUILicenseRtf" })
+            setAttributeNode(doc.createAttribute("Value").also { it.value = licensePath })
+        }.also { productElement.appendChild(it) }
     }
 
 
@@ -370,14 +332,12 @@ private fun editWixTask(
     // 这段逻辑要和 UpgradeCode 一起设置，如果 UpgradeCode 一直保持不变，安装新版的时候会自动卸载旧版本。
     // 如果 UpgradeCode 改变了，可能会安装两个版本
     // <MajorUpgrade AllowSameVersionUpgrades="yes" DowngradeErrorMessage="A newer version of [ProductName] is already installed." AllowSameVersionUpgrades="yes"/>
-    val majorUpgrade = doc.createElement("MajorUpgrade")
-    val majorUpgradeDowngradeErrorMessage = doc.createAttribute("DowngradeErrorMessage")
-    majorUpgradeDowngradeErrorMessage.value = "新版的[ProductName]已经安装，如果要安装旧版本，请先把新版本卸载。"
-    val majorUpgradeAllowSameVersionUpgrades = doc.createAttribute("AllowSameVersionUpgrades")
-    majorUpgradeAllowSameVersionUpgrades.value = "yes"
-    majorUpgrade.setAttributeNode(majorUpgradeAllowSameVersionUpgrades)
-    majorUpgrade.setAttributeNode(majorUpgradeDowngradeErrorMessage)
-    productElement.appendChild(majorUpgrade)
+    doc.createElement("MajorUpgrade").apply {
+        val errorMessage = "新版的[ProductName]已经安装，如果要安装旧版本，请先把新版本卸载。"
+        setAttributeNode(doc.createAttribute("AllowSameVersionUpgrades").also { it.value = "yes" })
+        setAttributeNode(doc.createAttribute("DowngradeErrorMessage").also { it.value = errorMessage })
+    }.also { productElement.appendChild(it) }
+
 
     // 设置 fragment 节点
     val fragmentElement = doc.getElementsByTagName("Fragment").item(0) as Element
