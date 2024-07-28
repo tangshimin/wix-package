@@ -11,14 +11,13 @@ import javax.xml.transform.OutputKeys
 import java.nio.charset.StandardCharsets
 
 // 如果要让用户选择安装路径，需要设置 license 文件，如果不设置，会使用一个默认的 license
-// 如果不想在安装界面显示 license，需要把 249 到 257 行注释掉
 val licenseFile = project.file("license.rtf")
-val licensePath = if(licenseFile.exists()) licenseFile.absolutePath else ""
+//val licensePath = if(licenseFile.exists()) licenseFile.absolutePath else ""
+val licensePath = ""
 
 // 设置安装包的图标，显示在控制面板的应用程序列表
 val iconFile = project.file("src/main/resources/logo/logo.ico")
 val iconPath = if(iconFile.exists()) iconFile.absolutePath else ""
-
 
 // 可以设置为开发者的名字或开发商的名字，在控制面板里 manufacturer 会显示为发布者
 // 这个信息会和项目的名称一起写入到注册表中
@@ -255,12 +254,70 @@ private fun editWixTask(
     installUI.setAttributeNode(peopertyValue)
     productElement.appendChild(installUI)
 
-    // 添加 <UIRef Id="WixUI_InstallDir" />
+    //<UI>
+    //  <UIRef Id="WixUI_InstallDir" />
+    //</UI>
+    val uiElement = doc.createElement("UI")
+    productElement.appendChild(uiElement)
     val installDirUIRef = doc.createElement("UIRef")
     val dirUiId = doc.createAttribute("Id")
     dirUiId.value = "WixUI_InstallDir"
     installDirUIRef.setAttributeNode(dirUiId)
-    productElement.appendChild(installDirUIRef)
+    uiElement.appendChild(installDirUIRef)
+
+    if(licensePath.isEmpty()){
+        //  <Publish Dialog="WelcomeDlg"
+        //        Control="Next"
+        //        Event="NewDialog"
+        //        Value="InstallDirDlg"
+        //        Order="2">1</Publish>
+        val publish1 = doc.createElement("Publish")
+        val publish1Dialog = doc.createAttribute("Dialog")
+        publish1Dialog.value = "WelcomeDlg"
+        val publish1Control = doc.createAttribute("Control")
+        publish1Control.value = "Next"
+        val publish1Event = doc.createAttribute("Event")
+        publish1Event.value = "NewDialog"
+        val publish1Value = doc.createAttribute("Value")
+        publish1Value.value = "InstallDirDlg"
+        val publish1Order = doc.createAttribute("Order")
+        publish1Order.value = "2"
+        val publish1Text = doc.createTextNode("1")
+        publish1.setAttributeNode(publish1Dialog)
+        publish1.setAttributeNode(publish1Control)
+        publish1.setAttributeNode(publish1Event)
+        publish1.setAttributeNode(publish1Value)
+        publish1.setAttributeNode(publish1Order)
+        publish1.appendChild(publish1Text)
+        uiElement.appendChild(publish1)
+
+        //  <Publish Dialog="InstallDirDlg"
+        //        Control="Back"
+        //        Event="NewDialog"
+        //        Value="WelcomeDlg"
+        //        Order="2">1</Publish>
+        val publish2 = doc.createElement("Publish")
+        val publish2Dialog = doc.createAttribute("Dialog")
+        publish2Dialog.value = "InstallDirDlg"
+        val publish2Control = doc.createAttribute("Control")
+        publish2Control.value = "Back"
+        val publish2Event = doc.createAttribute("Event")
+        publish2Event.value = "NewDialog"
+        val publish2Value = doc.createAttribute("Value")
+        publish2Value.value = "WelcomeDlg"
+        val publish2Order = doc.createAttribute("Order")
+        publish2Order.value = "2"
+        val publish2Text = doc.createTextNode("1")
+        publish2.setAttributeNode(publish2Dialog)
+        publish2.setAttributeNode(publish2Control)
+        publish2.setAttributeNode(publish2Event)
+        publish2.setAttributeNode(publish2Value)
+        publish2.setAttributeNode(publish2Order)
+        publish2.appendChild(publish2Text)
+        uiElement.appendChild(publish2)
+
+    }
+
 
     // 添加 <UIRef Id="WixUI_ErrorProgressText" />
     val errText = doc.createElement("UIRef")
