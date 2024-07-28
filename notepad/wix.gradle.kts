@@ -92,7 +92,7 @@ project.tasks.register<Exec>("compileWxs") {
     commandLine(candle, "${project.name}.wxs","-nologo", "-dSourceDir=.\\${project.name}")
 }
 
-project.tasks.register<Exec>("lightWixobj") {
+project.tasks.register<Exec>("light") {
     group = "compose wix"
     description = "Linking the .wixobj file and creating a MSI"
     val compileWxs = tasks.named("compileWxs")
